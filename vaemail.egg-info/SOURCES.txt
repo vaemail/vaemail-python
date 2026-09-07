@@ -1,0 +1,8 @@
+README.md
+pyproject.toml
+tests/test_sdk.py
+vaemail/__init__.py
+vaemail.egg-info/PKG-INFO
+vaemail.egg-info/SOURCES.txt
+vaemail.egg-info/dependency_links.txt
+vaemail.egg-info/top_level.txt
