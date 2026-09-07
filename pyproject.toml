@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vaemail"
+version = "1.0.0"
+description = "Email infrastructure for AI agents and applications: send transactional email, authenticate sending domains, track delivery, diagnose deliverability."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "VaEmail (Agence SW)" }]
+requires-python = ">=3.9"
+dependencies = []
+keywords = ["email", "email-api", "transactional-email", "ai-agent", "agent", "deliverability", "sdk", "vaemail", "eu"]
+
+[project.urls]
+Homepage = "https://vaemail.fr/agents"
+Documentation = "https://vaemail.fr/docs/api"
+Source = "https://github.com/vaemail/vaemail-python"
+
+[tool.setuptools]
+packages = ["vaemail"]
