@@ -213,6 +213,9 @@ class VaEmail:
     def list_suppressions(self, **filters: Any) -> Any:
         return self._call("GET", "/api/v1/suppressions", query=filters)
 
+    def remove_suppression(self, email: str) -> Any:
+        return self._call("DELETE", f"/api/v1/suppressions/{urllib.parse.quote(email)}")
+
     def usage(self) -> Any:
         return self._call("GET", "/api/v1/usage")
 
