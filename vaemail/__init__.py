@@ -219,5 +219,44 @@ class VaEmail:
     def usage(self) -> Any:
         return self._call("GET", "/api/v1/usage")
 
+    def me(self) -> Any:
+        """Compte, clé utilisée (jamais son secret) et mode de la clé : `live` ou `sandbox`."""
+        return self._call("GET", "/api/v1/me")
+
+    def list_contacts(self, **filters: Any) -> Any:
+        """Filtres : limit, offset, sort, external_reference."""
+        return self._call("GET", "/v3/contacts", query=filters)
+
+    def get_contact(self, identifier: str | int) -> Any:
+        """Par email ou identifiant numérique."""
+        return self._call("GET", f"/v3/contacts/{urllib.parse.quote(str(identifier))}")
+
+    def create_contact(
+        self,
+        email: str,
+        *,
+        external_reference: str | None = None,
+        upsert: bool = False,
+        **fields: Any,
+    ) -> Any:
+        """Crée un contact. `external_reference` : votre identifiant, unique par compte.
+
+        Avec `upsert=True`, l'email retrouve le contact en priorité, puis la
+        référence externe si aucun contact ne porte cet email.
+        """
+        corps: dict[str, Any] = {"email": email, **fields}
+        if external_reference is not None:
+            corps["external_reference"] = external_reference
+        if upsert:
+            corps["updateEnabled"] = True
+
+        return self._call("POST", "/v3/contacts", body=corps)
+
+    def update_contact(self, identifier: str | int, **changes: Any) -> Any:
+        """`external_reference=None` efface la référence ; absente, elle n'est pas touchée."""
+        return self._call(
+            "PUT", f"/v3/contacts/{urllib.parse.quote(str(identifier))}", body=changes
+        )
+
     def audit_logs(self, **filters: Any) -> Any:
         return self._call("GET", "/api/v1/audit-logs", query=filters)

@@ -102,6 +102,40 @@ class TestSdk(unittest.TestCase):
         self.assertEqual(capture.exception.code, "QUOTA_EXCEEDED")
         self.assertTrue(capture.exception.retryable)
 
+    def test_me_interroge_api_v1_me(self):
+        appels, opener = espion({"success": True, "data": {"mode": "sandbox"}, "sandbox": True})
+        reponse = VaEmail(api_key="k", opener=opener).me()
+
+        self.assertEqual(appels[0].full_url, f"{DEFAULT_BASE_URL}/api/v1/me")
+        self.assertEqual(appels[0].get_method(), "GET")
+        self.assertEqual(reponse["data"]["mode"], "sandbox")
+
+    def test_external_reference_part_a_la_creation_et_en_upsert(self):
+        appels, opener = espion({"id": 7})
+        client = VaEmail(api_key="k", opener=opener)
+
+        client.create_contact("a@exemple.fr", external_reference="CRM-1")
+        client.create_contact("b@exemple.fr", external_reference="CRM-2", upsert=True, listIds=[3])
+
+        self.assertEqual(appels[0].full_url, f"{DEFAULT_BASE_URL}/v3/contacts")
+        self.assertEqual(json.loads(appels[0].data), {"email": "a@exemple.fr", "external_reference": "CRM-1"})
+        self.assertEqual(
+            json.loads(appels[1].data),
+            {"email": "b@exemple.fr", "external_reference": "CRM-2", "updateEnabled": True, "listIds": [3]},
+        )
+
+    def test_external_reference_filtre_la_liste_et_s_efface_en_mise_a_jour(self):
+        appels, opener = espion()
+        client = VaEmail(api_key="k", opener=opener)
+
+        client.list_contacts(external_reference="CRM 1")
+        client.update_contact("a@exemple.fr", external_reference=None)
+
+        self.assertEqual(appels[0].full_url, f"{DEFAULT_BASE_URL}/v3/contacts?external_reference=CRM+1")
+        self.assertEqual(appels[1].get_method(), "PUT")
+        self.assertEqual(appels[1].full_url, f"{DEFAULT_BASE_URL}/v3/contacts/a%40exemple.fr")
+        self.assertEqual(json.loads(appels[1].data), {"external_reference": None})
+
 
 if __name__ == "__main__":
     unittest.main()
