@@ -36,6 +36,18 @@ client.validate({"to": "customer@example.com", "subject": "Hi", "html": "<p>Hi</
 Same checks as a real send — key scope, quotas, sending domain, suppression
 list — but nothing leaves. Useful when an agent builds a message on its own.
 
+## Identify the account and use sandbox mode
+
+`GET /api/v1/me` returns the tenant, non-secret key metadata, scopes and `mode`
+(`live` or `sandbox`). Contacts support an optional tenant-unique
+`external_reference` for CRM identifiers and upserts.
+
+With a sandbox key, reads are normal but every POST, PUT, PATCH and DELETE is fully
+validated inside a transaction that is always rolled back. No database row, job,
+email, SMS, webhook or outbound HTTP call survives. The response has
+`X-VaEmail-Sandbox: 1` and JSON objects include `sandbox: true`; idempotency keys are
+not persisted. This is an integration simulation, not proof of delivery.
+
 ## Authenticate a sending domain
 
 ```python
