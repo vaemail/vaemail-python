@@ -84,6 +84,33 @@ except VaEmailError as error:
 
 Full API reference: <https://vaemail.fr/docs/api>
 
+## Connecter Stripe
+
+La connexion Stripe utilise une clé restreinte `rk_live_` ou `rk_test_`, avec Customers
+en lecture et Webhook Endpoints en écriture. Les clés secrètes `sk_` sont refusées. La
+clé n'est jamais renvoyée par l'API : l'état de la connexion expose seulement ses quatre
+derniers caractères, ainsi que ceux du token du webhook.
+
+Les routes REST sont :
+
+- `GET /api/v1/integrations/stripe` pour lire l'état, sans secret ;
+- `POST /api/v1/integrations/stripe` avec `{"api_key":"rk_live_..."}` pour créer ou
+  réconcilier le webhook (`settings.write`) ;
+- `DELETE /api/v1/integrations/stripe` pour supprimer le webhook puis la connexion locale.
+  Cette action irréversible demande une validation humaine explicite.
+
+Stripe appelle ensuite `POST /api/v1/webhooks/stripe/{token}`. Cette route publique
+vérifie l'en-tête `Stripe-Signature` ; elle ne reçoit pas la clé API VaEmail.
+
+Les quatre événements pris en charge déclenchent les automatisations suivantes :
+
+| Événement Stripe | Déclencheur VaEmail |
+| --- | --- |
+| `invoice.payment_failed` | `stripe_payment_failed` (`payment_failed`) |
+| `customer.subscription.created` | `stripe_subscription_created` (`subscription_created`) |
+| `customer.subscription.deleted` | `stripe_subscription_deleted` (`subscription_deleted`) |
+| `checkout.session.completed` | `stripe_checkout_completed` (`checkout_completed`) |
+
 ## Tests
 
 ```bash
